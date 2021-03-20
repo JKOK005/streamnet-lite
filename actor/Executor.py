@@ -4,11 +4,17 @@ import messages
 
 class StreamnetExecutor(pykka.ThreadingActor):
 
-	logger = logging.getLogger()
+	logger 		= logging.getLogger()
+	ID 			= None
+	model 		= None
+	next_routee	= None
 
-	def __init__(self, deployed_model, forward_routees):
+	def __init__(self, deployed_model, forward_route, identifier: str = None):
 		super().__init__()
-		pass
+		self.ID 			= identifier
+		self.model 			= deployed_model
+		self.next_routee 	= forward_route
+		return
 
 	def on_start(self):
 		logging("Starting up Streamnet Executor")
@@ -20,4 +26,8 @@ class StreamnetExecutor(pykka.ThreadingActor):
 		pass
 
 	def on_receive(self, message):
-		pass
+		if message is ForwardStreamlet:
+			pass
+		elif message is BackpropStreamlet:
+			pass
+
