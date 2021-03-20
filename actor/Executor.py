@@ -1,5 +1,6 @@
 import pykka
 import logging
+import messages
 
 class StreamnetExecutor(pykka.ThreadingActor):
 
@@ -20,4 +21,3 @@ class StreamnetExecutor(pykka.ThreadingActor):
 
 	def on_receive(self, message):
 		pass
-
