@@ -1,4 +1,6 @@
 from BackpropStreamlet import BackpropStreamlet
 from ForwardStreamlet import ForwardStreamlet
+from WeightStreamlet import WeightStreamlet
+from BiasStreamlet import BiasStreamlet
 from ScaleRoutee import ScaleRoutee
 from ShrinkRoutee import ShrinkRoutee

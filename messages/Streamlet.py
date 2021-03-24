@@ -1,11 +1,16 @@
 import uuid
 
 class Streamnet(object):
-	tensor 	= None
-	ID 		= uuid.uuid1() 		# Streamlet unique ID
+	tensor 		= None
+	ID 			= uuid.uuid1() 		# Streamlet unique ID
+	fragments 	= 1					# How many streamlets do we expect from the previous layer before the streamlet is complete
 
-	def __init__(self, tensor):
-		self.tensor = tensor
+	def __init__(self, tensor, fragments):
+		self.tensor 	= tensor
+		self.fragments 	= fragments
 
 	def get_tensor(self):
-		return tensor
+		return self.tensor
+
+	def get_frag(self):
+		return self.fragments
