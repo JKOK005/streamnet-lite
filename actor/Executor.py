@@ -1,6 +1,6 @@
 import pykka
 import logging
-import messages
+from messages import *
 
 class StreamnetExecutor(pykka.ThreadingActor):
 
@@ -37,6 +37,7 @@ class StreamnetExecutor(pykka.ThreadingActor):
 
 	def on_receive(self, message):
 		tensor = message.get_tensor()
+		logger.info("Received tensor of shape: {0}".format(tensor.shape))
 
 		# Pass the streamlet on to downstream
 		if message is ForwardStreamlet:

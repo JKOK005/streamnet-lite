@@ -1,6 +1,6 @@
 import uuid
 
-class Streamnet(object):
+class Streamlet(object):
 	tensor 		= None
 	ID 			= uuid.uuid1() 		# Streamlet unique ID
 	fragments 	= 1					# How many streamlets do we expect from the previous layer before the streamlet is complete
