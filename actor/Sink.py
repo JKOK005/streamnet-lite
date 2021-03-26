@@ -12,7 +12,6 @@ class StreamnetSink(pykka.ThreadingActor):
 
 	def __init__(self, 	backward_routee, 
 						identifier: str = None):
-
 		super().__init__()
 		self.ID 				= identifier
 		self.backward_routee 	= backward_routee

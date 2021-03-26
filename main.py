@@ -8,25 +8,26 @@ import copy
 import tensorflow as tf
 
 if __name__ == "__main__":
-	dp_coordinator_1 	= DataParallelCoordinator()
+	dp_coordinator_1 	= None
+	dp_coordinator_2 	= None
+	dp_coordinator_3 	= None
+
+	source 				= StreamnetSource.start()
+
+	model_1 			= tf.keras.layers.Dense(units = 7, activation = "relu", use_bias = True)
+	executor_1 			= StreamnetExecutor(deployed_model = model_1)
+	dp_coordinator_1 	= DataParallelCoordinator.start(
+							routees = [copy.copy(executor_1) for _ in range(1)],
+							forward_routee = dp_coordinator_2,
+							backward_routee = source,
+							update_routee = DummyActor()
+						)
+
 	dp_coordinator_2 	= DataParallelCoordinator()
 	dp_coordinator_3 	= DataParallelCoordinator()
 
-	dummy_1 			= DummyActor()
-	dummy_2 			= DummyActor()
-	dummy_3 			= DummyActor()
-
-	source 				= StreamnetSource(forward_routee = dp_coordinator_1)
+	
 	sink 				= StreamnetSink(backward_routee = dp_coordinator_3)
-
-	model_1 			= tf.keras.layers.Dense(units = 7, activation = "relu", use_bias = True)
-	executor_1 			= StreamnetExecutor(
-							deployed_model 	= model_1,
-							forward_routee 	= dp_coordinator_2,
-							backward_routee = source,
-							update_routee  	= dummy_1,
-						)
-	dp_coordinator_1.add_routees([copy.copy(executor_1) for _ in range(1)])
 
 	model_2 			= tf.keras.layers.Dense(units = 5, activation = "relu", use_bias = True)
 	executor_2 			= StreamnetExecutor(

@@ -7,26 +7,43 @@ from actor.Executor import StreamnetExecutor
 
 class DataParallelCoordinator(pykka.ThreadingActor):
 
-	logger 	= logging.getLogger()
-	routees = None
-	ID 		= None
-	streamlet_cache 	= []
+	logger 			= logging.getLogger()
+	routees 		= None
+	forward_routee 	= None
+	backward_routee = None
+	update_routee 	= None
+	ID 				= None
+	streamlet_cache = []
 
-	def __init__(self, identifier: str = None):
+	def __init__(self, 	identifier,
+						routees, 						
+						forward_routee, 
+						backward_routee, 
+						update_routee):
+
 		super(DataParallelCoordinator, self).__init__()
 		self.ID = identifier if identifier else str(uuid.uuid1())
-		print(self.ID)
+		self.routees 			= routees
+		self.forward_routee 	= forward_routee
+		self.backward_routee 	= backward_routee
+		self.update_routee 		= update_routee
 		return
 
 	def _forward_pass(self, tensor):
 		split_tensors = tf.split(tensor, len(self.routees), axis = 0)
 		for (each_tensor, each_routee) in zip(split_tensors, self.routees):
-			each_routee.tell(ForwardStreamlet(tensor = each_tensor, fragments = len(split_tensors)))
+			each_routee.tell(ForwardStreamlet(	tensor = each_tensor, 
+												fragments = len(split_tensors), 
+												route_to = forward_routee))
 
 	def _back_prop(self, tensor):
 		split_tensors = tf.split(tensor, len(self.routees), axis = 0)
 		for (each_tensor, each_routee) in zip(split_tensors, self.routees):
-			each_routee.tell(BackpropStreamlet(tensor = tensor, fragments = len(split_tensors)))
+			each_routee.tell(BackpropStreamlet(	tensor = tensor, 
+												fragments = len(split_tensors),
+												route_to = backward_routee,
+												update_to = update_routee
+												))
 
 	def _clear_cache(self):
 		self.streamlet_cache  = []
@@ -46,9 +63,6 @@ class DataParallelCoordinator(pykka.ThreadingActor):
 			full_tensor = tf.concat(tensors, axis = 0)		# Combine over batch dimensions
 			self._back_prop(tensor = full_tensor)
 			self._clear_cache()
-
-	def add_routees(self, routees: [StreamnetExecutor]):
-		self.routees = routees
 
 	def on_start(self):
 		logging("Starting up Streamnet Coordinator: {0}".format(self.ID))

@@ -8,14 +8,10 @@ class StreamnetSource(pykka.ThreadingActor):
 
 	logger 			= logging.getLogger()
 	ID 				= None
-	forward_routee	= None
 
-	def __init__(self, 	forward_routee, 
-						identifier: str = None):
-
+	def __init__(self, identifier: str = None):
 		super().__init__()
 		self.ID 				= identifier
-		self.forward_routee 	= forward_routee
 		return
 
 	def on_start(self):
@@ -27,10 +23,10 @@ class StreamnetSource(pykka.ThreadingActor):
 	def on_failure(self, exception_type, exception_value, traceback):
 		pass
 
-	def initiate(self, interval):
+	def initiate(self, interval, forward_routee):
 		fwd_tensor 	= tf.random.uniform(shape = [4,1,5])
 		fwd_stream 	= ForwardStreamlet(tensor = fwd_tensor, fragments = 1)
-		self.forward_routee.tell(fwd_stream)
+		forward_routee.tell(fwd_stream)
 		time.sleep(interval)
 
 	def on_receive(self, message):		
