@@ -2,31 +2,49 @@ import pykka
 import logging
 import uuid
 import tensorflow as tf
+import messages
+import copy
 from messages import *
 from actor.Executor import StreamnetExecutor
+
+@pykka.traversable
+class DataParallelCoordinatorRoutes():
+	forward_routee 	= None
+	backprop_routee = None
+	update_routee 	= None
+
+	def get_forward_routee(self):
+		return self.forward_routee
+
+	def set_forward_routee(self, routee):
+		self.forward_routee = routee
+
+	def get_backprop_routee(self):
+		return self.backprop_routee
+
+	def set_backprop_routee(self, routee):
+		self.backprop_routee = routee
+
+	def get_update_routee(self):
+		return self.update_routee
+
+	def set_update_routee(self, routee):
+		self.update_routee = routee
 
 class DataParallelCoordinator(pykka.ThreadingActor):
 
 	logger 			= logging.getLogger()
-	routees 		= None
-	forward_routee 	= None
-	backward_routee = None
-	update_routee 	= None
 	ID 				= None
+	routees 		= None
+	routes 			= DataParallelCoordinatorRoutes()
 	streamlet_cache = []
 
-	def __init__(self, 	identifier,
-						routees, 						
-						forward_routee, 
-						backward_routee, 
-						update_routee):
+	def __init__(self, 	routees,	
+						identifier = None):
 
 		super(DataParallelCoordinator, self).__init__()
-		self.ID = identifier if identifier else str(uuid.uuid1())
-		self.routees 			= routees
-		self.forward_routee 	= forward_routee
-		self.backward_routee 	= backward_routee
-		self.update_routee 		= update_routee
+		self.ID 		= identifier if identifier else str(uuid.uuid1())
+		self.routees 	= routees
 		return
 
 	def _forward_pass(self, tensor):
@@ -34,16 +52,17 @@ class DataParallelCoordinator(pykka.ThreadingActor):
 		for (each_tensor, each_routee) in zip(split_tensors, self.routees):
 			each_routee.tell(ForwardStreamlet(	tensor = each_tensor, 
 												fragments = len(split_tensors), 
-												route_to = forward_routee))
+												route_to = self.routes.get_forward_routee()
+											))
 
 	def _back_prop(self, tensor):
 		split_tensors = tf.split(tensor, len(self.routees), axis = 0)
 		for (each_tensor, each_routee) in zip(split_tensors, self.routees):
 			each_routee.tell(BackpropStreamlet(	tensor = tensor, 
 												fragments = len(split_tensors),
-												route_to = backward_routee,
-												update_to = update_routee
-												))
+												route_to = self.routes.get_backprop_routee(),
+												update_to = self.routes.get_update_routee()
+											))
 
 	def _clear_cache(self):
 		self.streamlet_cache  = []
@@ -65,24 +84,24 @@ class DataParallelCoordinator(pykka.ThreadingActor):
 			self._clear_cache()
 
 	def on_start(self):
-		logging("Starting up Streamnet Coordinator: {0}".format(self.ID))
+		self.logger.info("Starting up Streamnet Coordinator: {0}".format(self.ID))
 
 	def on_stop(self):
-		logging("Shutting down Streamnet Coordinator: {0}".format(self.ID))
+		self.logger.info("Shutting down Streamnet Coordinator: {0}".format(self.ID))
 
 	def on_failure(self, exception_type, exception_value, traceback):
 		pass
 
 	def on_receive(self, message):
-		if message is ScaleRoutee:
+		if type(message) is messages.ScaleRoutee:
 			pass
 		
-		elif message is ShrinkRoutee:
+		elif type(message) is messages.ShrinkRoutee:
 			pass
 
-		elif message is ForwardStreamlet:
+		elif type(message) is messages.ForwardStreamlet:
 			self._handle_forward(fs = message)
 
-		elif message is BackpropStreamlet:
+		elif type(message) is messages.BackpropStreamlet:
 			self._handle_backprop(bs = message)
 

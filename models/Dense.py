@@ -4,10 +4,10 @@ class Dense(object):
 	_model = None
 
 	def __init__(self, units, activation, use_bias):
-		self._model 	= tf.keras.layers.Dense( units 		= units, 
-												 activation = activation,
-												 use_bias 	= use_bias,
-												)
+		self._model = tf.keras.layers.Dense( units 		= units, 
+											 activation = activation,
+											 use_bias 	= use_bias,
+											)
 	"""
 	Computes forward pass
 	"""

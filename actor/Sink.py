@@ -1,6 +1,8 @@
 import pykka
 import logging
+import tensorflow as tf
 import time
+import messages
 from messages import *
 
 class StreamnetSink(pykka.ThreadingActor):
@@ -18,19 +20,20 @@ class StreamnetSink(pykka.ThreadingActor):
 		return
 
 	def on_start(self):
-		logging("Starting up Streamnet Executor")
+		self.logger.info("Starting up Streamnet Executor")
 
 	def on_stop(self):
-		logging("Shutting down Streamnet Executor")
+		self.logger.info("Shutting down Streamnet Executor")
 
 	def on_failure(self, exception_type, exception_value, traceback):
 		pass
 
 	def on_receive(self, message):		
-		if 	message is ForwardStreamlet:
+		if 	type(message) is messages.ForwardStreamlet:
+			self.logger.info("Received forward streamlet in sink")
 			self.streamlet_cache.append(message)
 			if len(self.streamlet_cache) == message.get_frag():
+				# TODO: Replace with loss logic
 				bp_tensor 	= tf.random.uniform(shape=[4,1,3])
-				bp_stream 	= BackpropStreamlet(tensor = bp_tensor)
+				bp_stream 	= BackpropStreamlet(tensor = bp_tensor, fragments = 1)
 				self.backward_routee.tell(bp_stream)
-				self.logger.info("Received forward streamlet in sink")

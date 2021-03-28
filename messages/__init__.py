@@ -3,4 +3,5 @@ from messages.ForwardStreamlet import ForwardStreamlet
 from messages.WeightStreamlet import WeightStreamlet
 from messages.BiasStreamlet import BiasStreamlet
 from messages.ScaleRoutee import ScaleRoutee
+from messages.StartSourceStreamlet import StartSourceStreamlet
 from messages.ShrinkRoutee import ShrinkRoutee
