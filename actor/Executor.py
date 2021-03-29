@@ -6,16 +6,14 @@ from messages import *
 class StreamnetExecutor(pykka.ThreadingActor):
 
 	logger 			= logging.getLogger()
-	ID 				= None
-	model 			= None
-	cur_input 		= None
 
 	def __init__(self, 	deployed_model, 
 						identifier: str = None):
 
 		super().__init__()
-		self.ID 	= identifier
-		self.model 	= deployed_model
+		self.ID 		= identifier
+		self.model 		= deployed_model
+		self.cur_input = None
 		return
 
 	def on_start(self):
@@ -29,7 +27,7 @@ class StreamnetExecutor(pykka.ThreadingActor):
 
 	def on_receive(self, message):
 		tensor = message.get_tensor()
-		self.logger.info("Received tensor of shape: {0}".format(tensor.shape))
+		self.logger.debug("Received tensor of shape: {0}".format(tensor.shape))
 
 		# Pass the streamlet on to downstream
 		if type(message) is messages.ForwardStreamlet:
@@ -43,7 +41,7 @@ class StreamnetExecutor(pykka.ThreadingActor):
 		# Weight / bias updates & send back prop streamlet upstream 
 		elif type(message) is messages.BackpropStreamlet:
 			bp_tensor 		= self.model.backprop_pass(upstream_backprop_tensor = tensor)
-			wupdt_tensor	= self.model.delta_weights(input_tensor = cls.cur_input, upstream_backprop_tensor = tensor)
+			wupdt_tensor	= self.model.delta_weights(input_tensor = self.cur_input, upstream_backprop_tensor = tensor)
 			bupdt_tensor	= self.model.delta_bias(upstream_backprop_tensor = tensor)
 
 			bp_stream 		= BackpropStreamlet(tensor = bp_tensor, fragments = message.get_frag())

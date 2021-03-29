@@ -14,4 +14,4 @@ class DummyActor(pykka.ThreadingActor):
 		self.logger.info("Shutting down Dummy actor")
 
 	def on_receive(self, message):		
-		self.logger.info("Dummy actor received streamlet")
+		self.logger.debug("Dummy actor received streamlet")

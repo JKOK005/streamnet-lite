@@ -36,18 +36,20 @@ class DataParallelCoordinator(pykka.ThreadingActor):
 	logger 			= logging.getLogger()
 	ID 				= None
 	routees 		= None
-	routes 			= DataParallelCoordinatorRoutes()
-	streamlet_cache = []
+	routes 			= None
 
 	def __init__(self, 	routees,	
 						identifier = None):
 
 		super(DataParallelCoordinator, self).__init__()
-		self.ID 		= identifier if identifier else str(uuid.uuid1())
-		self.routees 	= routees
+		self.ID 				= identifier if identifier else str(uuid.uuid1())
+		self.routees 			= routees
+		self.routes 			= DataParallelCoordinatorRoutes()
+		self.streamlet_cache 	= []
 		return
 
 	def _forward_pass(self, tensor):
+		self.logger.debug("ForwardPass: {0}".format(self.ID))
 		split_tensors = tf.split(tensor, len(self.routees), axis = 0)
 		for (each_tensor, each_routee) in zip(split_tensors, self.routees):
 			each_routee.tell(ForwardStreamlet(	tensor = each_tensor, 
@@ -56,9 +58,10 @@ class DataParallelCoordinator(pykka.ThreadingActor):
 											))
 
 	def _back_prop(self, tensor):
+		self.logger.debug("Backprop: {0}".format(self.ID))
 		split_tensors = tf.split(tensor, len(self.routees), axis = 0)
 		for (each_tensor, each_routee) in zip(split_tensors, self.routees):
-			each_routee.tell(BackpropStreamlet(	tensor = tensor, 
+			each_routee.tell(BackpropStreamlet(	tensor = each_tensor, 
 												fragments = len(split_tensors),
 												route_to = self.routes.get_backprop_routee(),
 												update_to = self.routes.get_update_routee()
