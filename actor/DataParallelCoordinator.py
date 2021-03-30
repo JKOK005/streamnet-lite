@@ -6,6 +6,7 @@ import messages
 import copy
 from messages import *
 from actor.Executor import StreamnetExecutor
+from utils.StreamletTools import StreamletTools
 
 @pykka.traversable
 class DataParallelCoordinatorRoutes():
@@ -48,24 +49,20 @@ class DataParallelCoordinator(pykka.ThreadingActor):
 		self.streamlet_cache 	= []
 		return
 
-	def _forward_pass(self, tensor):
+	def _forward_pass(self, streamlet):
 		self.logger.debug("ForwardPass: {0}".format(self.ID))
-		split_tensors = tf.split(tensor, len(self.routees), axis = 0)
-		for (each_tensor, each_routee) in zip(split_tensors, self.routees):
-			each_routee.tell(ForwardStreamlet(	tensor = each_tensor, 
-												fragments = len(split_tensors), 
-												route_to = self.routes.get_forward_routee()
-											))
+		streamlets 	  = StreamletTools.shard(streamlet = streamlet, shards = len(self.routees))
+		for (each_streamlet, each_routee) in zip(streamlets, self.routees):
+			each_streamlet.set_route_to(route_to = self.routes.get_forward_routee())
+			each_routee.tell(each_streamlet)
 
-	def _back_prop(self, tensor):
+	def _back_prop(self, streamlet):
 		self.logger.debug("Backprop: {0}".format(self.ID))
-		split_tensors = tf.split(tensor, len(self.routees), axis = 0)
-		for (each_tensor, each_routee) in zip(split_tensors, self.routees):
-			each_routee.tell(BackpropStreamlet(	tensor = each_tensor, 
-												fragments = len(split_tensors),
-												route_to = self.routes.get_backprop_routee(),
-												update_to = self.routes.get_update_routee()
-											))
+		streamlets 	  = StreamletTools.shard(streamlet = streamlet, shards = len(self.routees))
+		for (each_tensor, each_routee) in zip(streamlets, self.routees):
+			each_streamlet.set_route_to(route_to = self.routes.get_backprop_routee())
+			each_streamlet.set_update_to(route_to = self.routes.get_update_routee())
+			each_routee.tell(each_streamlet)
 
 	def _clear_cache(self):
 		self.streamlet_cache  = []
@@ -73,17 +70,15 @@ class DataParallelCoordinator(pykka.ThreadingActor):
 	def _handle_forward(self, fs):
 		self.streamlet_cache.append(fs)
 		if len(self.streamlet_cache) == fs.get_frag():
-			tensors 	= [each_fs.get_tensor() for each_fs in self.streamlet_cache]
-			full_tensor = tf.concat(tensors, axis = 0)		# Combine over batch dimensions
-			self._forward_pass(tensor = full_tensor)
+			streamlet = StreamletTools.merge(streamlets = self.streamlet_cach)
+			self._forward_pass(streamlet = streamlet)
 			self._clear_cache()
 
 	def _handle_backprop(self, bs):
 		self.streamlet_cache.append(bs)
 		if len(self.streamlet_cache) == bs.get_frag():
-			tensors 	= [each_fs.get_tensor() for each_fs in self.streamlet_cache]
-			full_tensor = tf.concat(tensors, axis = 0)		# Combine over batch dimensions
-			self._back_prop(tensor = full_tensor)
+			streamlet = StreamletTools.merge(streamlets = self.streamlet_cach)
+			self._back_prop(streamlet = streamlet)
 			self._clear_cache()
 
 	def on_start(self):
