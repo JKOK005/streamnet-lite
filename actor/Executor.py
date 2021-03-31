@@ -32,7 +32,7 @@ class StreamnetExecutor(pykka.ThreadingActor):
 		# Pass the streamlet on to downstream
 		if type(message) is messages.ForwardStreamlet:
 			fwd_tensor 		= self.model.forward_pass(tensor = tensor)
-			fwd_stream 		= ForwardStreamlet(tensor = fwd_tensor, fragments = message.get_frag())
+			fwd_stream 		= ForwardStreamlet(tensor = fwd_tensor, fragments = message.get_frag(), index = message.get_index())
 			self.cur_input 	= tensor
 
 			forward_routee 	= message.get_route_to()
@@ -44,9 +44,9 @@ class StreamnetExecutor(pykka.ThreadingActor):
 			wupdt_tensor	= self.model.delta_weights(input_tensor = self.cur_input, upstream_backprop_tensor = tensor)
 			bupdt_tensor	= self.model.delta_bias(upstream_backprop_tensor = tensor)
 
-			bp_stream 		= BackpropStreamlet(tensor = bp_tensor, fragments = message.get_frag())
-			wupdt_stream 	= WeightStreamlet(tensor = wupdt_tensor, fragments = message.get_frag())
-			bupdt_stream 	= BiasStreamlet(tensor = bupdt_tensor, fragments = message.get_frag())
+			bp_stream 		= BackpropStreamlet(tensor = bp_tensor, fragments = message.get_frag(), index = message.get_index())
+			wupdt_stream 	= WeightStreamlet(tensor = wupdt_tensor, fragments = message.get_frag(), index = message.get_index())
+			bupdt_stream 	= BiasStreamlet(tensor = bupdt_tensor, fragments = message.get_frag(), index = message.get_index())
 			bp_routee 		= message.get_route_to()
 			update_routee 	= message.get_update_to()
 

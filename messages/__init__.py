@@ -1,5 +1,6 @@
 from messages.BackpropStreamlet import BackpropStreamlet
 from messages.ForwardStreamlet import ForwardStreamlet
+from messages.LabelStreamlet import LabelStreamlet
 from messages.WeightStreamlet import WeightStreamlet
 from messages.BiasStreamlet import BiasStreamlet
 from messages.ScaleRoutee import ScaleRoutee

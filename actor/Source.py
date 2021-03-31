@@ -31,13 +31,22 @@ class StreamnetSource(pykka.ThreadingActor):
 
 	def start_ingest(self):
 		self.epoch_start_time = time.time()
-		fwd_tensor 	= tf.random.uniform(shape = [2**15,1,20])
-		fwd_stream 	= ForwardStreamlet(tensor = fwd_tensor, fragments = 1)
+
+		batch_size 		= 2**8
+		inpt_tensor 	= tf.random.uniform(shape = [batch_size, 1, 20])
+		inpt_indexes 	= tf.convert_to_tensor([i for i in range(batch_size)])
+		fwd_stream 		= ForwardStreamlet(tensor = inpt_tensor, fragments = 1, index = inpt_indexes)
 		self.route_to.tell(fwd_stream)
+
+		out_labels 		= tf.random.uniform(shape = [batch_size, 1, 128])
+		out_indexes 	= tf.convert_to_tensor([i for i in range(batch_size)])
+		out_stream 		= LabelStreamlet(tensor = out_labels, fragments = 1, index = out_indexes)
+		self.sink_route.tell(out_stream)
 
 	def on_receive(self, message):	
 		if 	type(message) is messages.StartSourceStreamlet:
 			self.route_to 	= message.get_route_to()
+			self.sink_route = message.get_sink_route()
 			self.start_ingest()
 
 		elif type(message) is messages.BackpropStreamlet:

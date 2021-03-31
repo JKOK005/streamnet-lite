@@ -70,14 +70,14 @@ class DataParallelCoordinator(pykka.ThreadingActor):
 	def _handle_forward(self, fs):
 		self.streamlet_cache.append(fs)
 		if len(self.streamlet_cache) == fs.get_frag():
-			streamlet = StreamletTools.merge(streamlets = self.streamlet_cach)
+			streamlet = StreamletTools.merge(streamlets = self.streamlet_cache)
 			self._forward_pass(streamlet = streamlet)
 			self._clear_cache()
 
 	def _handle_backprop(self, bs):
 		self.streamlet_cache.append(bs)
 		if len(self.streamlet_cache) == bs.get_frag():
-			streamlet = StreamletTools.merge(streamlets = self.streamlet_cach)
+			streamlet = StreamletTools.merge(streamlets = self.streamlet_cache)
 			self._back_prop(streamlet = streamlet)
 			self._clear_cache()
 

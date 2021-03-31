@@ -28,7 +28,7 @@ if __name__ == "__main__":
 	executor_3			= StreamnetExecutor.start(deployed_model = model_3)
 	dp_coordinator_3 	= DataParallelCoordinator.start([copy.copy(executor_3) for _ in range(2**7)])
 
-	sink 				= StreamnetSink.start(backward_routee = dp_coordinator_3, loss = tf.keras.losses.MeanAbsoluteError())
+	sink 				= StreamnetSink.start(backward_routee = dp_coordinator_3, loss_model = tf.keras.losses.MeanAbsoluteError())
 
 	proxy_1 = dp_coordinator_1.proxy()
 	proxy_1.routes.set_forward_routee(routee = dp_coordinator_2)
@@ -46,4 +46,4 @@ if __name__ == "__main__":
 	proxy_3.routes.set_update_routee(routee = DummyActor.start())
 
 	time.sleep(1)
-	source.tell(StartSourceStreamlet(route_to = dp_coordinator_1, interval = 10))
+	source.tell(StartSourceStreamlet(route_to = dp_coordinator_1, sink_route = sink))
