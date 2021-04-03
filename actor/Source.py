@@ -38,7 +38,7 @@ class StreamnetSource(pykka.ThreadingActor):
 		fwd_stream 		= ForwardStreamlet(tensor = inpt_tensor, fragments = 1, index = inpt_indexes)
 		self.route_to.tell(fwd_stream)
 
-		out_labels 		= tf.random.uniform(shape = [batch_size, 1, 128])
+		out_labels 		= tf.random.uniform(shape = [batch_size, 1, 16])
 		out_indexes 	= tf.convert_to_tensor([i for i in range(batch_size)])
 		out_stream 		= LabelStreamlet(tensor = out_labels, fragments = 1, index = out_indexes)
 		self.sink_route.tell(out_stream)

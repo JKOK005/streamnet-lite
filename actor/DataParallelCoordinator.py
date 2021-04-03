@@ -59,9 +59,9 @@ class DataParallelCoordinator(pykka.ThreadingActor):
 	def _back_prop(self, streamlet):
 		self.logger.debug("Backprop: {0}".format(self.ID))
 		streamlets 	  = StreamletTools.shard(streamlet = streamlet, shards = len(self.routees))
-		for (each_tensor, each_routee) in zip(streamlets, self.routees):
+		for (each_streamlet, each_routee) in zip(streamlets, self.routees):
 			each_streamlet.set_route_to(route_to = self.routes.get_backprop_routee())
-			each_streamlet.set_update_to(route_to = self.routes.get_update_routee())
+			each_streamlet.set_update_to(update_to = self.routes.get_update_routee())
 			each_routee.tell(each_streamlet)
 
 	def _clear_cache(self):

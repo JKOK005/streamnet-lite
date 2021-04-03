@@ -16,19 +16,20 @@ if __name__ == "__main__":
 
 	source 				= StreamnetSource.start()
 
-	model_1 			= Dense(units = 128, activation = "relu", use_bias = True)
+	model_1 			= Dense(units = 64, activation = None, use_bias = True)
 	executor_1 			= StreamnetExecutor.start(deployed_model = model_1)
 	dp_coordinator_1 	= DataParallelCoordinator.start(routees = [copy.copy(executor_1) for _ in range(2**7)])	
 
-	model_2 			= Dense(units = 128, activation = "relu", use_bias = True)
+	model_2 			= Dense(units = 32, activation = None, use_bias = True)
 	executor_2 			= StreamnetExecutor.start(deployed_model = model_2)
 	dp_coordinator_2 	= DataParallelCoordinator.start(routees = [copy.copy(executor_2) for _ in range(2**7)])
 
-	model_3 			= Dense(units = 128, activation = "relu", use_bias = True)
+	model_3 			= Dense(units = 16, activation = None, use_bias = True)
 	executor_3			= StreamnetExecutor.start(deployed_model = model_3)
 	dp_coordinator_3 	= DataParallelCoordinator.start([copy.copy(executor_3) for _ in range(2**7)])
 
-	sink 				= StreamnetSink.start(backward_routee = dp_coordinator_3, loss_model = tf.keras.losses.MeanAbsoluteError())
+	loss_model 			= Loss(tf_loss = tf.keras.losses.MeanSquaredError(reduction = tf.keras.losses.Reduction.SUM))
+	sink 				= StreamnetSink.start(backward_routee = dp_coordinator_3, loss_model = loss_model)
 
 	proxy_1 = dp_coordinator_1.proxy()
 	proxy_1.routes.set_forward_routee(routee = dp_coordinator_2)
