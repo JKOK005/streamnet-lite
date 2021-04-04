@@ -13,7 +13,7 @@ class StreamnetExecutor(pykka.ThreadingActor):
 		super().__init__()
 		self.ID 		= identifier
 		self.model 		= deployed_model
-		self.cur_input = None
+		self.cur_input 	= None
 		return
 
 	def on_start(self):

@@ -51,6 +51,7 @@ class StreamnetSink(pykka.ThreadingActor):
 			bp_stream 		= BackpropStreamlet(tensor = computed_loss, fragments = 1, index = sort_index)
 			self.backward_routee.tell(bp_stream)
 			self.reset()
+			self.logger.info("Batch loss: {0}".format(-1 * tf.reduce_mean(computed_loss)))
 		return
 
 	def on_receive(self, message):		
