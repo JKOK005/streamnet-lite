@@ -14,7 +14,7 @@ import tensorflow as tf
 import time
 
 def build_dense(units, num_routees):
-	executor = StreamnetExecutor.start(deployed_model = Dense(units = units, activation = None, use_bias = True))
+	executor = StreamnetExecutor.start(deployed_model = Dense(units = units, use_bias = True))
 	return DataParallelCoordinator.start(routees = [copy.copy(executor) for _ in range(num_routees)])	
 
 def build_activation(activation, num_routees):
@@ -47,6 +47,7 @@ if __name__ == "__main__":
 		build_dense(units = 128, num_routees = NUM_ROUTEES),
 		build_activation(activation = Sigmoid(), num_routees = NUM_ROUTEES),
 	]
+	
 	loss_model 	= Loss(tf_loss = tf.keras.losses.MeanSquaredError(reduction = tf.keras.losses.Reduction.SUM))
 	sink 		= StreamnetSink.start(backward_routee = layers[-1], loss_model = loss_model)
 	set_proxy_routing(source = source, layers = layers, sink = sink)

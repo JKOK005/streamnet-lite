@@ -1,22 +1,15 @@
 import tensorflow as tf
 
-class Dense(object):
+class Convolution2D(object):
 	_model = None
 
-	def __init__(self, units, use_bias):
-		self._model = tf.keras.layers.Dense( units 		= units, 
-											 activation = None,
-											 use_bias 	= use_bias,
-											)
-	"""
-	Computes forward pass
-	"""
+	def __init__(self, filters, kernel, strides, use_bias):
+		self._model = tf.keras.layers.Conv2D(filters = filters, kernel_size = kernel, strides = strides, 
+											 activation = None, use_bias = use_bias)
+
 	def forward_pass(self, tensor):
 		return self._model(tensor)
 
-	"""
-	Computes dL_dx for weights to be propagated to upstream layers
-	"""
 	def backprop_pass(self, input_tensor, dl_dy):
 		with tf.GradientTape() as tape:
 			tape.watch(input_tensor)
@@ -32,9 +25,8 @@ class Dense(object):
 		dl_dx = dy_dx * dl_dy
 		return tf.math.reduce_sum(dl_dx, axis=[i for i in range(1, 1 + size_y, 1)])
 
-	"""
-	Computes dL_dw for updating weights
-	"""
+	# Input is of shape 	[batch, in_height, in_width, in_channels]
+	# Backprop is of shape 	[batch, out_height, out_width, filters]
 	def delta_weights(self, input_tensor, dl_dy):
 		with tf.GradientTape() as tape:
 			[weights, _] = self._model.trainable_variables
@@ -51,10 +43,7 @@ class Dense(object):
 		dl_dw = dy_dw * dl_dy
 		return tf.math.reduce_sum(dl_dw, axis=[i for i in range(1, 1 + size_y, 1)])
 
-	"""
-	Computes dL_db for updating weights
-	"""
-	def delta_bias(self, input_tensor, dl_dy):
+	def delta_bias(self, dl_dy):
 		with tf.GradientTape() as tape:
 			[_, bias] = self._model.trainable_variables
 			tape.watch(bias)
@@ -70,15 +59,8 @@ class Dense(object):
 		dl_db = dy_db * dl_dy
 		return tf.math.reduce_sum(dl_db, axis=[i for i in range(1, 1 + size_y, 1)])
 
-	"""
-	Overrides existing model with new weights
-	"""
 	def set_params(self, weights = None, bias = None):
-		(cur_weights, cur_bias) = self._model.get_weights()
-		to_set_weights 			= weights if weights is not None else cur_weights
-		to_set_bias 			= bias if bias is not None else cur_bias
-		self._model.set_weights([to_set_weights, to_set_bias])
-		return
+		pass
 
 	def get_model(self):
 		return self._model
