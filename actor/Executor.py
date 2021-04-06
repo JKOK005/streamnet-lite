@@ -40,9 +40,9 @@ class StreamnetExecutor(pykka.ThreadingActor):
 
 		# Weight / bias updates & send back prop streamlet upstream 
 		elif type(message) is messages.BackpropStreamlet:
-			bp_tensor 		= self.model.backprop_pass(upstream_backprop_tensor = tensor)
-			wupdt_tensor	= self.model.delta_weights(input_tensor = self.cur_input, upstream_backprop_tensor = tensor)
-			bupdt_tensor	= self.model.delta_bias(upstream_backprop_tensor = tensor)
+			bp_tensor 		= self.model.backprop_pass(input_tensor = self.cur_input, dl_dy = tensor)
+			wupdt_tensor	= self.model.delta_weights(input_tensor = self.cur_input, dl_dy = tensor)
+			bupdt_tensor	= self.model.delta_bias(input_tensor = self.cur_input, dl_dy = tensor)
 
 			bp_stream 		= BackpropStreamlet(tensor = bp_tensor, fragments = message.get_frag(), index = message.get_index())
 			wupdt_stream 	= WeightStreamlet(tensor = wupdt_tensor, fragments = message.get_frag(), index = message.get_index())

@@ -3,9 +3,9 @@ import tensorflow as tf
 class Dense(object):
 	_model = None
 
-	def __init__(self, units, use_bias):
+	def __init__(self, units, activation, use_bias):
 		self._model = tf.keras.layers.Dense( units 		= units, 
-											 activation = None,
+											 activation = activation,
 											 use_bias 	= use_bias,
 											)
 	"""
@@ -17,6 +17,7 @@ class Dense(object):
 	"""
 	Computes dL_dx for weights to be propagated to upstream layers
 	"""
+	@tf.function(experimental_relax_shapes=True)
 	def backprop_pass(self, input_tensor, dl_dy):
 		with tf.GradientTape() as tape:
 			tape.watch(input_tensor)
@@ -35,15 +36,16 @@ class Dense(object):
 	"""
 	Computes dL_dw for updating weights
 	"""
+	@tf.function(experimental_relax_shapes=True)
 	def delta_weights(self, input_tensor, dl_dy):
 		with tf.GradientTape() as tape:
 			[weights, _] = self._model.trainable_variables
 			tape.watch(weights)
 			y = self._model(input_tensor)
 
-		size_w 		= len(weights.shape)
-		size_y 		= len(y.shape[1:])
-		dy_dw 		= tape.jacobian(y, weights)
+		size_w 	= len(weights.shape)
+		size_y 	= len(y.shape[1:])
+		dy_dw 	= tape.jacobian(y, weights)
 		
 		for _ in range(size_w):
 			dl_dy = tf.expand_dims(dl_dy, -1)
@@ -54,15 +56,16 @@ class Dense(object):
 	"""
 	Computes dL_db for updating weights
 	"""
+	@tf.function(experimental_relax_shapes=True)
 	def delta_bias(self, input_tensor, dl_dy):
 		with tf.GradientTape() as tape:
 			[_, bias] = self._model.trainable_variables
 			tape.watch(bias)
 			y = self._model(input_tensor)
 
-		size_b 		= len(bias.shape)
-		size_y 		= len(y.shape[1:])
-		dy_db 		= tape.jacobian(y, bias)
+		size_b 	= len(bias.shape)
+		size_y 	= len(y.shape[1:])
+		dy_db 	= tape.jacobian(y, bias)
 		
 		for _ in range(size_b):
 			dl_dy = tf.expand_dims(dl_dy, -1)

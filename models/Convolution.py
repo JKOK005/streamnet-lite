@@ -3,13 +3,15 @@ import tensorflow as tf
 class Convolution2D(object):
 	_model = None
 
-	def __init__(self, filters, kernel, strides, use_bias):
+	def __init__(self, 	filters, kernel, strides, 
+						activation, use_bias):
 		self._model = tf.keras.layers.Conv2D(filters = filters, kernel_size = kernel, strides = strides, 
-											 activation = None, use_bias = use_bias)
+											 activation = activation, use_bias = use_bias)
 
 	def forward_pass(self, tensor):
 		return self._model(tensor)
 
+	@tf.function(experimental_relax_shapes=True)
 	def backprop_pass(self, input_tensor, dl_dy):
 		with tf.GradientTape() as tape:
 			tape.watch(input_tensor)
@@ -27,6 +29,7 @@ class Convolution2D(object):
 
 	# Input is of shape 	[batch, in_height, in_width, in_channels]
 	# Backprop is of shape 	[batch, out_height, out_width, filters]
+	@tf.function(experimental_relax_shapes=True)
 	def delta_weights(self, input_tensor, dl_dy):
 		with tf.GradientTape() as tape:
 			[weights, _] = self._model.trainable_variables
@@ -43,7 +46,8 @@ class Convolution2D(object):
 		dl_dw = dy_dw * dl_dy
 		return tf.math.reduce_sum(dl_dw, axis=[i for i in range(1, 1 + size_y, 1)])
 
-	def delta_bias(self, dl_dy):
+	@tf.function(experimental_relax_shapes=True)
+	def delta_bias(self, input_tensor, dl_dy):
 		with tf.GradientTape() as tape:
 			[_, bias] = self._model.trainable_variables
 			tape.watch(bias)
