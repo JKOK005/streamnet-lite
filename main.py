@@ -45,12 +45,16 @@ if __name__ == "__main__":
 	logging.basicConfig(level=logging.INFO)
 
 	BATCH_SIZE 	= 2**5
-	NUM_ROUTEES = 2**2
+	NUM_ROUTEES = 2**0
 
-	source 	= StreamnetSource.start(batch_size = BATCH_SIZE, input_shape = [12,12,3], output_shape = [10,10,8])
+	source 	= StreamnetSource.start(batch_size = BATCH_SIZE, input_shape = [24,24,3], output_shape = [18,1,16])
 	layers 	= [
-		build_conv(filters = 10, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = 1),
-		build_dense(units = 8, activation = 'sigmoid', num_routees = NUM_ROUTEES)
+		build_conv(filters = 32, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = NUM_ROUTEES),
+		build_conv(filters = 32, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = NUM_ROUTEES),
+		build_conv(filters = 32, kernel = (3,20), strides = (1,1), activation = 'sigmoid', num_routees = NUM_ROUTEES),
+		build_dense(units = 16, activation = 'sigmoid', num_routees = NUM_ROUTEES),
+		build_dense(units = 16, activation = 'sigmoid', num_routees = NUM_ROUTEES),
+		build_dense(units = 16, activation = 'sigmoid', num_routees = NUM_ROUTEES)
 	]
 	
 	loss_model 	= Loss(tf_loss = tf.keras.losses.MeanSquaredError(reduction = tf.keras.losses.Reduction.SUM))

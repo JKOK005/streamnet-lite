@@ -29,7 +29,6 @@ class Convolution2D(object):
 
 	# Input is of shape 	[batch, in_height, in_width, in_channels]
 	# Backprop is of shape 	[batch, out_height, out_width, filters]
-	@tf.function(experimental_relax_shapes=True)
 	def delta_weights(self, input_tensor, dl_dy):
 		with tf.GradientTape() as tape:
 			[weights, _] = self._model.trainable_variables
@@ -38,7 +37,7 @@ class Convolution2D(object):
 
 		size_w 		= len(weights.shape)
 		size_y 		= len(y.shape[1:])
-		dy_dw 		= tape.jacobian(y, weights)
+		dy_dw 		= tape.jacobian(y, weights)		# TODO: This is very slow. Need to optimize
 		
 		for _ in range(size_w):
 			dl_dy = tf.expand_dims(dl_dy, -1)
