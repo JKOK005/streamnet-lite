@@ -53,3 +53,9 @@ class StreamnetExecutor(pykka.ThreadingActor):
 			bp_routee.tell(bp_stream)
 			update_routee.tell(wupdt_stream)
 			update_routee.tell(bupdt_stream)
+
+		elif type(messages) is messages.WeightStreamlet:
+			pass
+
+		elif type(messages) is messages.BiasStreamlet:
+			pass

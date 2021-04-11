@@ -31,7 +31,7 @@ class DataParallelCoordinatorRoutes():
 
 	def set_update_routee(self, routee):
 		self.update_routee = routee
-
+		
 
 class DataParallelCoordinator(pykka.ThreadingActor):
 
