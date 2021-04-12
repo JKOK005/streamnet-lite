@@ -19,19 +19,18 @@ class StreamnetOptimizer(pykka.ThreadingActor):
 		self.bias_cache 		= []
 		return
 
-	def _handle_weights(self, ws):
-		self.weights_cache.append(ws)
-		if len(self.weights_cache) == ws.get_frag():
-			streamlet = StreamletTools.reduce_on_batch(streamlets = self.weights_cache)
-			self.logger.debug(f"Reduced weights of shape: {streamlet.get_tensor().shape}")
-			self.layer_coordinator.tell(streamlet)
+	def _clear_cache(self):
+		self.weights_cache 	= []
+		self.bias_cache 	= []
 
-	def _handle_bias(self, bs):
-		self.bias_cache.append(bs)
-		if len(self.bias_cache) == bs.get_frag():
-			streamlet = StreamletTools.reduce_on_batch(streamlets = self.bias_cache)
-			self.logger.debug(f"Reduced bias of shape: {streamlet.get_tensor().shape}")
+	def _reduce_msg(self):
+		if len(self.weights_cache) == self.weights_cache[0].get_frag() and len(self.bias_cache) == self.bias_cache[0].get_frag():
+			weight_streamlet = StreamletTools.reduce_on_batch(streamlets = self.weights_cache)
+			bias_streamlet 	 = StreamletTools.reduce_on_batch(streamlets = self.bias_cache)
+			self.logger.debug(f"Reduced weights of shape: {weight_streamlet.get_tensor().shape} and bias of shape: {bias_streamlet.get_tensor().shape}")
+			streamlet = WeightBiasStreamlet(reduced_weight_streamlet = weight_streamlet, reduced_bias_streamlet = bias_streamlet)
 			self.layer_coordinator.tell(streamlet)
+			self._clear_cache()
 
 	def on_start(self):
 		self.logger.info("Starting up Streamnet Executor")
@@ -47,7 +46,9 @@ class StreamnetOptimizer(pykka.ThreadingActor):
 		self.logger.debug("Received tensor of shape: {0}".format(tensor.shape))
 
 		if type(message) is messages.WeightStreamlet:
-			self._handle_weights(ws = message)
+			self.weights_cache.append(message)
+			self._reduce_msg()
 		
 		elif type(message) is messages.BiasStreamlet:
-			self._handle_bias(bs = message)
+			self.bias_cache.append(message)
+			self._reduce_msg()

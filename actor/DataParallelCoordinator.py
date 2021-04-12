@@ -82,6 +82,10 @@ class DataParallelCoordinator(pykka.ThreadingActor):
 			self._back_prop(streamlet = streamlet)
 			self._clear_cache()
 
+	def _handle_update(self, wbs):
+		for each_routee in self.routees:
+			each_routee.tell(wbs)
+
 	def on_start(self):
 		self.logger.info("Starting up Streamnet Coordinator: {0}".format(self.ID))
 
@@ -103,4 +107,7 @@ class DataParallelCoordinator(pykka.ThreadingActor):
 
 		elif type(message) is messages.BackpropStreamlet:
 			self._handle_backprop(bs = message)
+
+		elif type(message) is messages.WeightBiasStreamlet:
+			self._handle_update(wbs = message)
 

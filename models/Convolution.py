@@ -64,7 +64,11 @@ class Convolution2D(object):
 		return tf.math.reduce_sum(dl_db, axis=[i for i in range(1, 1 + size_y, 1)])
 
 	def set_params(self, weights = None, bias = None):
-		pass
+		(cur_weights, cur_bias) = self._model.get_weights()
+		to_set_weights 			= weights if weights is not None else cur_weights
+		to_set_bias 			= bias if bias is not None else cur_bias
+		self._model.set_weights([to_set_weights, to_set_bias])
+		return
 
 	def get_model(self):
 		return self._model

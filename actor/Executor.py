@@ -26,11 +26,10 @@ class StreamnetExecutor(pykka.ThreadingActor):
 		pass
 
 	def on_receive(self, message):
-		tensor = message.get_tensor()
-		self.logger.debug("Received tensor of shape: {0}".format(tensor.shape))
-
 		# Pass the streamlet on to downstream
 		if type(message) is messages.ForwardStreamlet:
+			tensor 			= message.get_tensor()
+			self.logger.debug("Received tensor of shape: {0}".format(tensor.shape))
 			fwd_tensor 		= self.model.forward_pass(tensor = tensor)
 			fwd_stream 		= ForwardStreamlet(tensor = fwd_tensor, fragments = message.get_frag(), index = message.get_index())
 			self.cur_input 	= tensor
@@ -40,6 +39,8 @@ class StreamnetExecutor(pykka.ThreadingActor):
 
 		# Weight / bias updates & send back prop streamlet upstream 
 		elif type(message) is messages.BackpropStreamlet:
+			tensor 			= message.get_tensor()
+			self.logger.debug("Received tensor of shape: {0}".format(tensor.shape))
 			bp_tensor 		= self.model.backprop_pass(input_tensor = self.cur_input, dl_dy = tensor)
 			wupdt_tensor	= self.model.delta_weights(input_tensor = self.cur_input, dl_dy = tensor)
 			bupdt_tensor	= self.model.delta_bias(input_tensor = self.cur_input, dl_dy = tensor)
@@ -54,8 +55,7 @@ class StreamnetExecutor(pykka.ThreadingActor):
 			update_routee.tell(wupdt_stream)
 			update_routee.tell(bupdt_stream)
 
-		elif type(messages) is messages.WeightStreamlet:
-			pass
-
-		elif type(messages) is messages.BiasStreamlet:
-			pass
+		elif type(message) is messages.WeightBiasStreamlet:
+			weight_tensor 	= message.weight_streamlet.get_tensor()
+			bias_tensor 	= message.bias_streamlet.get_tensor()
+			self.model.set_params(weights = weight_tensor, bias = bias_tensor)
