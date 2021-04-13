@@ -47,11 +47,11 @@ class StreamnetSink(pykka.ThreadingActor):
 		# Check if all data is present before computing loss
 		if self.received_pred is not None and self.received_label is not None:
 			(prediction, truth, sort_index) = StreamletTools.join_on_index(streamlet_A = self.received_pred, streamlet_B = self.received_label)
-			computed_loss 	= self.loss_model.compute(tensor = prediction, label = truth)
-			bp_stream 		= BackpropStreamlet(tensor = computed_loss, fragments = 1, index = sort_index)
+			loss_grad, loss 	= self.loss_model.compute(tensor = prediction, label = truth)
+			bp_stream 			= BackpropStreamlet(tensor = loss_grad, fragments = 1, index = sort_index)
 			self.backward_routee.tell(bp_stream)
 			self.reset()
-			self.logger.info("Batch loss: {0}".format(-1 * tf.reduce_mean(computed_loss)))
+			self.logger.info("Batch loss: {0}".format(loss))
 		return
 
 	def on_receive(self, message):		

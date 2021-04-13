@@ -20,9 +20,9 @@ class StreamnetSource(pykka.ThreadingActor):
 		self.input_shape 	= input_shape
 		self.output_shape 	= output_shape
 		self.batch_size 	= batch_size
-		self.inpt_tensor 	= tf.random.uniform(shape = [self.batch_size] + self.input_shape, minval = 0, maxval = 1)
+		self.inpt_tensor 	= tf.random.uniform(shape = [self.batch_size] + self.input_shape, minval = 0.5, maxval = 1)
 		self.inpt_indexes 	= tf.convert_to_tensor([i for i in range(self.batch_size)])
-		self.out_labels 	= tf.random.uniform(shape = [self.batch_size] + self.output_shape, minval = 0, maxval = 1)
+		self.out_labels 	= tf.random.uniform(shape = [self.batch_size] + self.output_shape, minval = 0, maxval = 0)
 		self.out_indexes 	= tf.convert_to_tensor([i for i in range(self.batch_size)])
 		self.streamlet_cache = []
 		return
@@ -56,6 +56,6 @@ class StreamnetSource(pykka.ThreadingActor):
 		elif type(message) is messages.BackpropStreamlet:
 			self.streamlet_cache.append(message)
 			if len(self.streamlet_cache) == message.get_frag():
-				self.logger.info("Time taken: {0} s".format(time.time() - self.epoch_start_time))
+				self.logger.debug("Time taken: {0} s".format(time.time() - self.epoch_start_time))
 				self._clear_cache()
 				self.start_ingest() 	# Repeat ingestion process
