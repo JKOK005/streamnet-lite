@@ -1,6 +1,7 @@
 from actor.DataParallelCoordinator import DataParallelCoordinator
 from actor.Activation import StreamnetActivation
 from actor.Executor import StreamnetExecutor
+from actor.Flatten import StreamnetFlatten
 from actor.Sink import StreamnetSink
 from actor.Source import StreamnetSource
 from actor.Optimizer import StreamnetOptimizer
@@ -9,6 +10,7 @@ from models.Dense import Dense
 from models.Loss import Loss
 from models.Sigmoid import Sigmoid
 from messages.StartSourceStreamlet import StartSourceStreamlet
+from dataset.Cifar10DSGen import Cifar10DSGen
 import copy
 import logging
 import tensorflow as tf
@@ -16,6 +18,10 @@ import time
 
 def build_dense(units, activation, num_routees):
 	executor = StreamnetExecutor.start(deployed_model = Dense(units = units, activation = activation, use_bias = True))
+	return DataParallelCoordinator.start(routees = [copy.copy(executor) for _ in range(num_routees)])	
+
+def build_flatten(num_routees):
+	executor = StreamnetFlatten.start()
 	return DataParallelCoordinator.start(routees = [copy.copy(executor) for _ in range(num_routees)])	
 
 def build_conv(filters, kernel, strides, activation, num_routees):
@@ -47,16 +53,18 @@ if __name__ == "__main__":
 	logging.basicConfig(level=logging.INFO)
 
 	BATCH_SIZE 	= 2**5
-	NUM_ROUTEES = 2**4
+	NUM_ROUTEES = 2**0
+	ds_gen 	= Cifar10DSGen()
 
-	source 	= StreamnetSource.start(batch_size = BATCH_SIZE, input_shape = [24,24,3], output_shape = [18,1,4])
+	source 	= StreamnetSource.start(dataset_gen = ds_gen, batch_size = BATCH_SIZE)
 	layers 	= [
 		build_conv(filters = 4, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = NUM_ROUTEES),
 		build_conv(filters = 4, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = NUM_ROUTEES),
-		build_conv(filters = 4, kernel = (3,20), strides = (1,1), activation = 'sigmoid', num_routees = NUM_ROUTEES),
-		build_dense(units = 4, activation = 'sigmoid', num_routees = NUM_ROUTEES),
-		build_dense(units = 4, activation = 'sigmoid', num_routees = NUM_ROUTEES),
-		build_dense(units = 4, activation = 'sigmoid', num_routees = NUM_ROUTEES)
+		build_conv(filters = 4, kernel = (3,28), strides = (1,1), activation = 'sigmoid', num_routees = NUM_ROUTEES),
+		build_flatten(num_routees = 1),
+		build_dense(units = 10, activation = 'sigmoid', num_routees = NUM_ROUTEES),
+		build_dense(units = 10, activation = 'sigmoid', num_routees = NUM_ROUTEES),
+		build_dense(units = 10, activation = 'relu', num_routees = NUM_ROUTEES)
 	]
 	
 	loss_model 	= Loss(tf_loss = tf.keras.losses.MeanSquaredError(reduction = tf.keras.losses.Reduction.SUM))

@@ -29,7 +29,7 @@ class StreamnetExecutor(pykka.ThreadingActor):
 		# Pass the streamlet on to downstream
 		if type(message) is messages.ForwardStreamlet:
 			tensor 			= message.get_tensor()
-			self.logger.debug("Received tensor of shape: {0}".format(tensor.shape))
+			self.logger.debug("Received tensor of shape: {0}".format(tensor.shape))		
 			fwd_tensor 		= self.model.forward_pass(tensor = tensor)
 			fwd_stream 		= ForwardStreamlet(tensor = fwd_tensor, fragments = message.get_frag(), index = message.get_index())
 			self.cur_input 	= tensor

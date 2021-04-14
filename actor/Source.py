@@ -11,20 +11,14 @@ class StreamnetSource(pykka.ThreadingActor):
 	ID 					= None
 	epoch_start_time 	= 0
 
-	def __init__(self, 	batch_size,
-						input_shape,
-						output_shape, 
+	def __init__(self, 	dataset_gen,
+						batch_size,
 						identifier: str = None):
 		super().__init__()
-		self.ID 			= identifier
-		self.input_shape 	= input_shape
-		self.output_shape 	= output_shape
-		self.batch_size 	= batch_size
-		self.inpt_tensor 	= tf.random.uniform(shape = [self.batch_size] + self.input_shape, minval = 0.5, maxval = 1)
-		self.inpt_indexes 	= tf.convert_to_tensor([i for i in range(self.batch_size)])
-		self.out_labels 	= tf.random.uniform(shape = [self.batch_size] + self.output_shape, minval = 0, maxval = 0)
-		self.out_indexes 	= tf.convert_to_tensor([i for i in range(self.batch_size)])
-		self.streamlet_cache = []
+		self.ID 				= identifier
+		self.batch_size 		= batch_size
+		self.dataset_gen 		= dataset_gen.gen_ds(batch_size = batch_size)
+		self.streamlet_cache 	= []
 		return
 
 	def _clear_cache(self):
@@ -41,10 +35,14 @@ class StreamnetSource(pykka.ThreadingActor):
 
 	def start_ingest(self):
 		self.epoch_start_time = time.time()
-		fwd_stream 		= ForwardStreamlet(tensor = self.inpt_tensor, fragments = 1, index = self.inpt_indexes)
+		(inpt_tensor, out_labels) = next(self.dataset_gen)
+		inpt_indexes = tf.convert_to_tensor([i for i in range(self.batch_size)])
+		out_indexes = tf.convert_to_tensor([i for i in range(self.batch_size)])
+
+		fwd_stream 	= ForwardStreamlet(tensor = tf.cast(inpt_tensor, dtype=tf.double), fragments = 1, index = inpt_indexes)
 		self.route_to.tell(fwd_stream)
 
-		out_stream 		= LabelStreamlet(tensor = self.out_labels, fragments = 1, index = self.out_indexes)
+		out_stream 	= LabelStreamlet(tensor = out_labels, fragments = 1, index = out_indexes)
 		self.sink_route.tell(out_stream)
 
 	def on_receive(self, message):	
