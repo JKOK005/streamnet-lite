@@ -52,18 +52,18 @@ def set_proxy_routing(source, layers, sink):
 if __name__ == "__main__":
 	logging.basicConfig(level=logging.INFO)
 
-	BATCH_SIZE 	= 2**5
-	NUM_ROUTEES = 2**0
-	ds_gen 	= Cifar10DSGen()
+	BATCH_SIZE 	= 2**2
+	NUM_ROUTEES = 2**2
+	ds_gen 	= Cifar10DSGen(num_samples = 2**10)
 
 	source 	= StreamnetSource.start(dataset_gen = ds_gen, batch_size = BATCH_SIZE)
 	layers 	= [
+		build_conv(filters = 16, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = NUM_ROUTEES),
+		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = NUM_ROUTEES),
 		build_conv(filters = 4, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = NUM_ROUTEES),
-		build_conv(filters = 4, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = NUM_ROUTEES),
-		build_conv(filters = 4, kernel = (3,28), strides = (1,1), activation = 'sigmoid', num_routees = NUM_ROUTEES),
 		build_flatten(num_routees = 1),
-		build_dense(units = 10, activation = 'sigmoid', num_routees = NUM_ROUTEES),
-		build_dense(units = 10, activation = 'sigmoid', num_routees = NUM_ROUTEES),
+		build_dense(units = 32, activation = 'sigmoid', num_routees = NUM_ROUTEES),
+		build_dense(units = 16, activation = 'sigmoid', num_routees = NUM_ROUTEES),
 		build_dense(units = 10, activation = 'relu', num_routees = NUM_ROUTEES)
 	]
 	

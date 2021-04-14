@@ -17,20 +17,31 @@ class StreamnetOptimizer(pykka.ThreadingActor):
 		self.layer_coordinator 	= layer_coordinator
 		self.weights_cache 		= []
 		self.bias_cache 		= []
+		self.weight_streamlet 	= None
+		self.bias_streamlet 	= None
 		return
 
-	def _clear_cache(self):
-		self.weights_cache 	= []
-		self.bias_cache 	= []
+	def _reset(self):
+		self.weights_cache 		= []
+		self.bias_cache 		= []
+		self.weight_streamlet 	= None
+		self.bias_streamlet 	= None
 
-	def _reduce_msg(self):
-		if len(self.weights_cache) == self.weights_cache[0].get_frag() and len(self.bias_cache) == self.bias_cache[0].get_frag():
-			weight_streamlet = StreamletTools.reduce_on_batch(streamlets = self.weights_cache)
-			bias_streamlet 	 = StreamletTools.reduce_on_batch(streamlets = self.bias_cache)
-			self.logger.debug(f"Reduced weights of shape: {weight_streamlet.get_tensor().shape} and bias of shape: {bias_streamlet.get_tensor().shape}")
-			streamlet = WeightBiasStreamlet(reduced_weight_streamlet = weight_streamlet, reduced_bias_streamlet = bias_streamlet)
+	def _attempt_dispatch(self):
+		if self.weight_streamlet is not None and self.bias_streamlet is not None:
+			streamlet = WeightBiasStreamlet(reduced_weight_streamlet = self.weight_streamlet, reduced_bias_streamlet = self.bias_streamlet)
 			self.layer_coordinator.tell(streamlet)
-			self._clear_cache()
+			self._reset()
+
+	def _reduce_weight(self):
+		if len(self.weights_cache) == self.weights_cache[0].get_frag():
+			self.weight_streamlet = StreamletTools.reduce_on_batch(streamlets = self.weights_cache)
+			self._attempt_dispatch()
+
+	def _reduce_bias(self):
+		if len(self.bias_cache) == self.bias_cache[0].get_frag():
+			self.bias_streamlet = StreamletTools.reduce_on_batch(streamlets = self.bias_cache)
+			self._attempt_dispatch()
 
 	def on_start(self):
 		self.logger.info("Starting up Streamnet Executor")
@@ -47,8 +58,8 @@ class StreamnetOptimizer(pykka.ThreadingActor):
 
 		if type(message) is messages.WeightStreamlet:
 			self.weights_cache.append(message)
-			self._reduce_msg()
+			self._reduce_weight()
 		
 		elif type(message) is messages.BiasStreamlet:
 			self.bias_cache.append(message)
-			self._reduce_msg()
+			self._reduce_bias()
