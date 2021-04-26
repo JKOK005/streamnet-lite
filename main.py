@@ -52,9 +52,9 @@ def set_proxy_routing(source, layers, sink):
 if __name__ == "__main__":
 	logging.basicConfig(level=logging.INFO)
 
-	BATCH_SIZE 	= 2**6
+	BATCH_SIZE 	= 2**5
 	NUM_ROUTEES = 2**2
-	ds_gen 		= Cifar10DSGen(num_samples = 2**4)
+	ds_gen 		= Cifar10DSGen(num_samples = 2**6)
 
 	source 	= StreamnetSource.start(dataset_gen = ds_gen, batch_size = BATCH_SIZE)
 	layers 	= [
