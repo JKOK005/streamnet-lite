@@ -13,7 +13,7 @@ class Convolution2D(object):
 
 	@tf.function()
 	def backprop_pass(self, input_tensor, dl_dy):
-		with tf.GradientTape() as tape:
+		with tf.GradientTape(watch_accessed_variables=False) as tape:
 			tape.watch(input_tensor)
 			y = self._model(input_tensor)
 
@@ -31,7 +31,7 @@ class Convolution2D(object):
 	# Backprop is of shape 	[batch, out_height, out_width, filters]
 	@tf.function()
 	def delta_weights(self, input_tensor, dl_dy):
-		with tf.GradientTape() as tape:
+		with tf.GradientTape(watch_accessed_variables=False) as tape:
 			[weights, _] = self._model.trainable_variables
 			tape.watch(weights)
 			y = self._model(input_tensor)
@@ -48,7 +48,7 @@ class Convolution2D(object):
 
 	@tf.function()
 	def delta_bias(self, input_tensor, dl_dy):
-		with tf.GradientTape() as tape:
+		with tf.GradientTape(watch_accessed_variables=False) as tape:
 			[_, bias] = self._model.trainable_variables
 			tape.watch(bias)
 			y = self._model(input_tensor)
