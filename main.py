@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
 	source 	= StreamnetSource.start(dataset_gen = ds_gen, batch_size = BATCH_SIZE)
 	layers 	= [
-		build_conv(filters = 2, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = 4),
+		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = 4),
 		build_conv(filters = 2, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = 4),
 		build_conv(filters = 2, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = 4),
 		build_flatten(num_routees = 1),
