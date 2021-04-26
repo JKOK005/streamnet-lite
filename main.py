@@ -63,7 +63,7 @@ if __name__ == "__main__":
 		build_flatten(num_routees = 1),
 		build_dense(units = 32, activation = 'sigmoid', num_routees = 1),
 		build_dense(units = 16, activation = 'sigmoid', num_routees = 1),
-		build_dense(units = 10, activation = 'softmax', num_routees = 1)
+		build_dense(units = 10, activation = 'relu', num_routees = 1)
 	]
 	
 	loss_model 	= Loss(tf_loss = tf.keras.losses.MeanSquaredError(reduction = tf.keras.losses.Reduction.SUM))
