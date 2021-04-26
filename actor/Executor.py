@@ -41,6 +41,7 @@ class StreamnetExecutor(pykka.ThreadingActor):
 		elif type(message) is messages.BackpropStreamlet:
 			tensor 			= message.get_tensor()
 			self.logger.debug("Received tensor of shape: {0}".format(tensor.shape))
+			
 			bp_tensor 		= self.model.backprop_pass(input_tensor = self.cur_input, dl_dy = tensor)
 			wupdt_tensor	= self.model.delta_weights(input_tensor = self.cur_input, dl_dy = tensor)
 			bupdt_tensor	= self.model.delta_bias(input_tensor = self.cur_input, dl_dy = tensor)
