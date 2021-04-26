@@ -52,19 +52,19 @@ def set_proxy_routing(source, layers, sink):
 if __name__ == "__main__":
 	logging.basicConfig(level=logging.INFO)
 
-	BATCH_SIZE 	= 2**6
-	NUM_ROUTEES = 2**5
-	ds_gen 	= Cifar10DSGen(num_samples = 2**20)
+	BATCH_SIZE 	= 2**3
+	NUM_ROUTEES = 2**2
+	ds_gen 		= Cifar10DSGen(num_samples = 2**20)
 
 	source 	= StreamnetSource.start(dataset_gen = ds_gen, batch_size = BATCH_SIZE)
 	layers 	= [
-		build_conv(filters = 16, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = NUM_ROUTEES),
-		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = NUM_ROUTEES),
-		build_conv(filters = 4, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = NUM_ROUTEES),
+		build_conv(filters = 32, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = NUM_ROUTEES),
+		build_conv(filters = 16, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = NUM_ROUTEES),
+		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = NUM_ROUTEES),
 		build_flatten(num_routees = 1),
-		build_dense(units = 32, activation = 'sigmoid', num_routees = NUM_ROUTEES),
-		build_dense(units = 16, activation = 'sigmoid', num_routees = NUM_ROUTEES),
-		build_dense(units = 10, activation = 'relu', num_routees = NUM_ROUTEES)
+		build_dense(units = 32, activation = 'relu', num_routees = 1),
+		build_dense(units = 16, activation = 'relu', num_routees = 1),
+		build_dense(units = 10, activation = 'softmax', num_routees = 1)
 	]
 	
 	loss_model 	= Loss(tf_loss = tf.keras.losses.MeanSquaredError(reduction = tf.keras.losses.Reduction.SUM))

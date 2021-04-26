@@ -17,7 +17,7 @@ class Dense(object):
 	"""
 	Computes dL_dx for weights to be propagated to upstream layers
 	"""
-	@tf.function(experimental_relax_shapes=True)
+	@tf.function(autograph=False, experimental_relax_shapes=True)
 	def backprop_pass(self, input_tensor, dl_dy):
 		with tf.GradientTape() as tape:
 			tape.watch(input_tensor)
@@ -36,7 +36,7 @@ class Dense(object):
 	"""
 	Computes dL_dw for updating weights
 	"""
-	@tf.function(experimental_relax_shapes=True)
+	@tf.function(autograph=False, experimental_relax_shapes=True)
 	def delta_weights(self, input_tensor, dl_dy):
 		with tf.GradientTape() as tape:
 			[weights, _] = self._model.trainable_variables
@@ -56,7 +56,7 @@ class Dense(object):
 	"""
 	Computes dL_db for updating weights
 	"""
-	@tf.function(experimental_relax_shapes=True)
+	@tf.function(autograph=False, experimental_relax_shapes=True)
 	def delta_bias(self, input_tensor, dl_dy):
 		with tf.GradientTape() as tape:
 			[_, bias] = self._model.trainable_variables
