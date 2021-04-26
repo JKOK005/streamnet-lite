@@ -58,13 +58,13 @@ if __name__ == "__main__":
 
 	source 	= StreamnetSource.start(dataset_gen = ds_gen, batch_size = BATCH_SIZE)
 	layers 	= [
-		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = 32),
-		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = 32),
-		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = 32),
+		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
+		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
+		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
 		build_flatten(num_routees = 1),
-		build_dense(units = 32, activation = 'sigmoid', num_routees = 1),
-		build_dense(units = 16, activation = 'sigmoid', num_routees = 1),
-		build_dense(units = 10, activation = 'relu', num_routees = 1)
+		build_dense(units = 32, activation = 'relu', num_routees = 1),
+		build_dense(units = 16, activation = 'relu', num_routees = 1),
+		build_dense(units = 10, activation = 'sigmoid', num_routees = 1)
 	]
 	
 	loss_model 	= Loss(tf_loss = tf.keras.losses.MeanSquaredError(reduction = tf.keras.losses.Reduction.SUM))
