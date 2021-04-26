@@ -54,13 +54,13 @@ if __name__ == "__main__":
 
 	BATCH_SIZE 	= 2**6
 	NUM_ROUTEES = 2**2
-	ds_gen 		= Cifar10DSGen(num_samples = 2**5)
+	ds_gen 		= Cifar10DSGen(num_samples = 2**4)
 
 	source 	= StreamnetSource.start(dataset_gen = ds_gen, batch_size = BATCH_SIZE)
 	layers 	= [
-		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = 2),
-		build_conv(filters = 4, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = 2),
-		build_conv(filters = 4, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = 2),
+		build_conv(filters = 1, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = 4),
+		build_conv(filters = 1, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = 4),
+		build_conv(filters = 1, kernel = (3,3), strides = (1,1), activation = 'sigmoid', num_routees = 4),
 		build_flatten(num_routees = 1),
 		build_dense(units = 32, activation = 'sigmoid', num_routees = 1),
 		build_dense(units = 16, activation = 'sigmoid', num_routees = 1),
