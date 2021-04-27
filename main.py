@@ -11,6 +11,7 @@ from models.Loss import Loss
 from models.Sigmoid import Sigmoid
 from messages.StartSourceStreamlet import StartSourceStreamlet
 from dataset.Cifar10DSGen import Cifar10DSGen
+from dataset.RandomDSGen import RandomDSGen
 import copy
 import logging
 import tensorflow as tf
@@ -54,17 +55,25 @@ if __name__ == "__main__":
 
 	BATCH_SIZE 	= 2**5
 	NUM_ROUTEES = 2**2
-	ds_gen 		= Cifar10DSGen(num_samples = 2**6)
+	# ds_gen 		= Cifar10DSGen(num_samples = 2**6)
+	ds_gen 		= RandomDSGen(input_shape = [24,24,3], label_shape = [16,16,1])
 
 	source 	= StreamnetSource.start(dataset_gen = ds_gen, batch_size = BATCH_SIZE)
+	# layers 	= [
+	# 	build_conv(filters = 16, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
+	# 	build_conv(filters = 16, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
+	# 	build_conv(filters = 16, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
+	# 	build_flatten(num_routees = 1),
+	# 	build_dense(units = 32, activation = 'relu', num_routees = 1),
+	# 	build_dense(units = 32, activation = 'relu', num_routees = 1),
+		# build_dense(units = 10, activation = 'sigmoid', num_routees = 1)
+	# ]
+
 	layers 	= [
-		build_conv(filters = 16, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
-		build_conv(filters = 16, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
-		build_conv(filters = 16, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
-		build_flatten(num_routees = 1),
-		build_dense(units = 32, activation = 'relu', num_routees = 1),
-		build_dense(units = 32, activation = 'relu', num_routees = 1),
-		build_dense(units = 10, activation = 'sigmoid', num_routees = 1)
+		build_conv(filters = 1, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 1),
+		build_conv(filters = 1, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 1),
+		build_conv(filters = 1, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 1),
+		build_conv(filters = 1, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 1),
 	]
 	
 	loss_model 	= Loss(tf_loss = tf.keras.losses.MeanSquaredError(reduction = tf.keras.losses.Reduction.SUM))
