@@ -54,6 +54,6 @@ class StreamnetSource(pykka.ThreadingActor):
 		elif type(message) is messages.BackpropStreamlet:
 			self.streamlet_cache.append(message)
 			if len(self.streamlet_cache) == message.get_frag():
-				self.logger.debug("Time taken: {0} s".format(time.time() - self.epoch_start_time))
+				self.logger.info("Time taken: {0} s".format(time.time() - self.epoch_start_time))
 				self._clear_cache()
 				self.start_ingest() 	# Repeat ingestion process
