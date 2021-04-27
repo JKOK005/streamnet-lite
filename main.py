@@ -70,10 +70,10 @@ if __name__ == "__main__":
 	# ]
 
 	layers 	= [
-		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 1),
-		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 1),
-		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 1),
-		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 1),
+		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 2),
+		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 2),
+		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 2),
+		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 2),
 	]
 	
 	loss_model 	= Loss(tf_loss = tf.keras.losses.MeanSquaredError(reduction = tf.keras.losses.Reduction.SUM))
