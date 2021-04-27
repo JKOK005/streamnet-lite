@@ -62,8 +62,8 @@ if __name__ == "__main__":
 		build_conv(filters = 16, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
 		build_conv(filters = 16, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
 		build_flatten(num_routees = 1),
-		build_dense(units = 32, activation = 'relu', num_routees = 1),
-		build_dense(units = 16, activation = 'relu', num_routees = 1),
+		build_dense(units = 64, activation = 'relu', num_routees = 1),
+		build_dense(units = 64, activation = 'relu', num_routees = 1),
 		build_dense(units = 10, activation = 'sigmoid', num_routees = 1)
 	]
 	
