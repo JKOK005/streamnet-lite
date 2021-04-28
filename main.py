@@ -66,14 +66,22 @@ if __name__ == "__main__":
 	# 	build_flatten(num_routees = 1),
 	# 	build_dense(units = 32, activation = 'relu', num_routees = 1),
 	# 	build_dense(units = 32, activation = 'relu', num_routees = 1),
-		# build_dense(units = 10, activation = 'sigmoid', num_routees = 1)
+	#   build_dense(units = 10, activation = 'sigmoid', num_routees = 1)
+	# ]
+
+	# Purely convolution layers
+	# layers 	= [
+	# 	build_conv(filters = 32, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
+	# 	build_conv(filters = 32, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
+	# 	build_conv(filters = 32, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
+	# 	build_conv(filters = 32, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
 	# ]
 
 	layers 	= [
-		build_conv(filters = 32, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
-		build_conv(filters = 32, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
-		build_conv(filters = 32, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
-		build_conv(filters = 32, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
+		build_dense(units = 2, activation = 'sigmoid', num_routees = 1),
+		build_dense(units = 2, activation = 'sigmoid', num_routees = 1),
+		build_dense(units = 2, activation = 'sigmoid', num_routees = 1),
+		build_dense(units = 2, activation = 'sigmoid', num_routees = 1),
 	]
 	
 	loss_model 	= Loss(tf_loss = tf.keras.losses.MeanSquaredError(reduction = tf.keras.losses.Reduction.SUM))
