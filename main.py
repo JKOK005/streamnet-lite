@@ -56,7 +56,7 @@ if __name__ == "__main__":
 	BATCH_SIZE 	= 2**5
 	NUM_ROUTEES = 2**2
 	# ds_gen 		= Cifar10DSGen(num_samples = 2**6)
-	ds_gen 		= RandomDSGen(input_shape = [24,24,3], label_shape = [24,24,32])
+	ds_gen 		= RandomDSGen(input_shape = [24,24,3], label_shape = [24,24,16])
 
 	source 	= StreamnetSource.start(dataset_gen = ds_gen, batch_size = BATCH_SIZE)
 	# layers 	= [
