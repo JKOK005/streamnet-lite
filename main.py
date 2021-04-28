@@ -78,10 +78,10 @@ if __name__ == "__main__":
 	# ]
 
 	layers 	= [
-		build_dense(units = 32, activation = 'sigmoid', num_routees = 4),
-		build_dense(units = 32, activation = 'sigmoid', num_routees = 4),
-		build_dense(units = 32, activation = 'sigmoid', num_routees = 4),
-		build_dense(units = 32, activation = 'sigmoid', num_routees = 4),
+		build_dense(units = 32, activation = 'sigmoid', num_routees = 8),
+		build_dense(units = 32, activation = 'sigmoid', num_routees = 8),
+		build_dense(units = 32, activation = 'sigmoid', num_routees = 8),
+		build_dense(units = 32, activation = 'sigmoid', num_routees = 8),
 	]
 	
 	loss_model 	= Loss(tf_loss = tf.keras.losses.MeanSquaredError(reduction = tf.keras.losses.Reduction.SUM))
