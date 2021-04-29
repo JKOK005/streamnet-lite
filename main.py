@@ -56,7 +56,7 @@ if __name__ == "__main__":
 	BATCH_SIZE 	= 2**5
 	NUM_ROUTEES = 2**2
 	# ds_gen 		= Cifar10DSGen(num_samples = 2**6)
-	ds_gen 		= RandomDSGen(input_shape = [24,24,3], label_shape = [24,24,16])
+	ds_gen 		= RandomDSGen(input_shape = [24,24,3], label_shape = [16,16,4])
 
 	source 	= StreamnetSource.start(dataset_gen = ds_gen, batch_size = BATCH_SIZE)
 	# layers 	= [
@@ -70,19 +70,19 @@ if __name__ == "__main__":
 	# ]
 
 	# Purely convolution layers
-	# layers 	= [
-	# 	build_conv(filters = 32, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
-	# 	build_conv(filters = 32, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
-	# 	build_conv(filters = 32, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
-	# 	build_conv(filters = 32, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
-	# ]
-
 	layers 	= [
-		build_dense(units = 16, activation = 'sigmoid', num_routees = 32),
-		build_dense(units = 16, activation = 'sigmoid', num_routees = 32),
-		build_dense(units = 16, activation = 'sigmoid', num_routees = 32),
-		build_dense(units = 16, activation = 'sigmoid', num_routees = 32),
+		build_conv(filters = 4, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 1),
+		build_conv(filters = 4, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 1),
+		build_conv(filters = 4, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 1),
+		build_conv(filters = 4, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 1),
 	]
+
+	# layers 	= [
+	# 	build_dense(units = 16, activation = 'sigmoid', num_routees = 32),
+	# 	build_dense(units = 16, activation = 'sigmoid', num_routees = 32),
+	# 	build_dense(units = 16, activation = 'sigmoid', num_routees = 32),
+	# 	build_dense(units = 16, activation = 'sigmoid', num_routees = 32),
+	# ]
 	
 	loss_model 	= Loss(tf_loss = tf.keras.losses.MeanSquaredError(reduction = tf.keras.losses.Reduction.SUM))
 	sink 		= StreamnetSink.start(backward_routee = layers[-1], loss_model = loss_model)
