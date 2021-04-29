@@ -30,8 +30,11 @@ class StreamnetExecutor(pykka.ThreadingActor):
 		if type(message) is messages.ForwardStreamlet:
 			tensor 			= message.get_tensor()
 			self.logger.debug("Received tensor of shape: {0}".format(tensor.shape))	
+			import time
+			start = time.time()
 			fwd_tensor 		= self.model.forward_pass(tensor = tensor)
 			fwd_stream 		= ForwardStreamlet(tensor = fwd_tensor, fragments = message.get_frag(), index = message.get_index())
+			self.logger.info("Forward prop: {0}".format(time.time() - start))
 			self.cur_input 	= tensor
 
 			forward_routee 	= message.get_route_to()

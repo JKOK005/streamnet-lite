@@ -35,18 +35,12 @@ class StreamnetOptimizer(pykka.ThreadingActor):
 
 	def _reduce_weight(self):
 		if len(self.weights_cache) == self.weights_cache[0].get_frag():
-			import time
-			start = time.time()
 			self.weight_streamlet = StreamletTools.reduce_on_batch(streamlets = self.weights_cache)
-			self.logger.info("Reduce weights: {0}".format(time.time() - start))
 			self._attempt_dispatch()
 
 	def _reduce_bias(self):
 		if len(self.bias_cache) == self.bias_cache[0].get_frag():
-			import time
-			start = time.time()
 			self.bias_streamlet = StreamletTools.reduce_on_batch(streamlets = self.bias_cache)
-			self.logger.info("Reduce bias: {0}".format(time.time() - start))
 			self._attempt_dispatch()
 
 	def on_start(self):
