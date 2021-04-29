@@ -62,12 +62,12 @@ if __name__ == "__main__":
 	
 	layers 	= [
 		build_conv(filters = 16, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
-		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
-		build_conv(filters = 4, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 32),
+		build_conv(filters = 8, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 16),
+		build_conv(filters = 4, kernel = (3,3), strides = (1,1), activation = 'relu', num_routees = 8),
 		build_flatten(num_routees = 1),
 		build_dense(units = 16, activation = 'relu', num_routees = 32),
-		build_dense(units = 8, activation = 'relu', num_routees = 32),
-	  	build_dense(units = 4, activation = 'sigmoid', num_routees = 32)
+		build_dense(units = 8, activation = 'relu', num_routees = 16),
+	  	build_dense(units = 4, activation = 'sigmoid', num_routees = 8)
 	]
 
 	# Purely convolution layers
