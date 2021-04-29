@@ -30,11 +30,8 @@ class StreamnetExecutor(pykka.ThreadingActor):
 		if type(message) is messages.ForwardStreamlet:
 			tensor 			= message.get_tensor()
 			self.logger.debug("Received tensor of shape: {0}".format(tensor.shape))	
-			import time
-			start = time.time()
 			fwd_tensor 		= self.model.forward_pass(tensor = tensor)
 			fwd_stream 		= ForwardStreamlet(tensor = fwd_tensor, fragments = message.get_frag(), index = message.get_index())
-			self.logger.info("Forward prop: {0}".format(time.time() - start))
 			self.cur_input 	= tensor
 
 			forward_routee 	= message.get_route_to()
@@ -44,9 +41,19 @@ class StreamnetExecutor(pykka.ThreadingActor):
 		elif type(message) is messages.BackpropStreamlet:
 			tensor 			= message.get_tensor()
 			self.logger.debug("Received tensor of shape: {0}".format(tensor.shape))
+
+			import time
+			start = time.time()
 			bp_tensor 		= self.model.backprop_pass(input_tensor = self.cur_input, dl_dy = tensor)
+			self.logger.info("Backprop loss: {0}".format(time.time() - start))	
+
+			start = time.time()
 			wupdt_tensor	= self.model.delta_weights(input_tensor = self.cur_input, dl_dy = tensor)
+			self.logger.info("Backprop weights: {0}".format(time.time() - start))	
+
+			start = time.time()
 			bupdt_tensor	= self.model.delta_bias(input_tensor = self.cur_input, dl_dy = tensor)
+			self.logger.info("Backprop bias: {0}".format(time.time() - start))	
 
 			bp_stream 		= BackpropStreamlet(tensor = bp_tensor, fragments = message.get_frag(), index = message.get_index())
 			wupdt_stream 	= WeightStreamlet(tensor = wupdt_tensor, fragments = message.get_frag(), index = message.get_index())
